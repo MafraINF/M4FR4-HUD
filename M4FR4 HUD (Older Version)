@@ -1,0 +1,223 @@
+--[[
+Mafrinha HUD - Ferramentas do Mafrinha
+Inclui: Noclip, Aumento de Vida, Regenerar Vida, ESP, Sentar, Aumentar Tamanho, Fly, Noclip Ampliado, ESP com Nomes, God, Surrender, Reset e Goto
+]]
+
+-- Variáveis principais
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local runService = game:GetService("RunService")
+local healthBoostEnabled = false
+local noclipEnabled = false
+local flyEnabled = false
+local sizeMultiplier = 1
+
+-- Funções principais
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
+    if noclipEnabled then
+        print("Noclip ativado!")
+    else
+        print("Noclip desativado!")
+    end
+end
+
+local function toggleHealthBoost()
+    healthBoostEnabled = not healthBoostEnabled
+    if healthBoostEnabled then
+        humanoid.MaxHealth = 500
+        humanoid.Health = humanoid.MaxHealth
+        print("Vida aumentada para 500!")
+    else
+        humanoid.MaxHealth = 100
+        humanoid.Health = humanoid.MaxHealth
+        print("Vida restaurada para 100!")
+    end
+end
+
+local function regenerateHealth()
+    humanoid.Health = humanoid.MaxHealth
+    print("Vida regenerada!")
+end
+
+local function toggleESP()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer and player.Character then
+            local highlight = player.Character:FindFirstChild("Highlight")
+            if highlight then
+                highlight:Destroy()
+            else
+                highlight = Instance.new("Highlight")
+                highlight.FillColor = Color3.new(1, 0, 0)
+                highlight.OutlineColor = Color3.new(1, 1, 1)
+                highlight.Parent = player.Character
+            end
+        end
+    end
+    print("ESP alternado!")
+end
+
+local function toggleESPWithNames()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            local billboard = player.Character:FindFirstChild("NameTag")
+            if billboard then
+                billboard:Destroy()
+            else
+                billboard = Instance.new("BillboardGui", player.Character)
+                billboard.Name = "NameTag"
+                billboard.Size = UDim2.new(0, 100, 0, 25)
+                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                billboard.AlwaysOnTop = true
+                local textLabel = Instance.new("TextLabel", billboard)
+                textLabel.Text = player.Name
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextColor3 = Color3.new(1, 1, 1)
+                textLabel.TextScaled = true
+            end
+        end
+    end
+    print("ESP com nomes alternado!")
+end
+
+local function sitCharacter()
+    humanoid.Sit = not humanoid.Sit
+    print("Sentar alternado!")
+end
+
+local function increaseSize()
+    sizeMultiplier = sizeMultiplier + 0.5
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") and not part.Name:lower():find("root") then
+            part.Size = part.Size * sizeMultiplier
+            local weld = part:FindFirstChildOfClass("Motor6D")
+            if weld then
+                weld.C0 = weld.C0 * CFrame.new(sizeMultiplier / 2, sizeMultiplier / 2, sizeMultiplier / 2)
+            end
+        end
+    end
+    humanoid.HipHeight = humanoid.HipHeight * sizeMultiplier
+    print("Tamanho aumentado!")
+end
+
+local function fly()
+    flyEnabled = not flyEnabled
+    if flyEnabled then
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        bodyVelocity.Velocity = Vector3.new(0, 50, 0)
+        bodyVelocity.Parent = character:FindFirstChild("HumanoidRootPart")
+        print("Fly ativado!")
+        runService.Stepped:Connect(function()
+            if flyEnabled then
+                character:FindFirstChild("HumanoidRootPart").Velocity = Vector3.new(0, 50, 0)
+            end
+        end)
+    else
+        local bodyVelocity = character:FindFirstChild("HumanoidRootPart"):FindFirstChild("BodyVelocity")
+        if bodyVelocity then
+            bodyVelocity:Destroy()
+        end
+        print("Fly desativado!")
+    end
+end
+
+local function godMode()
+    humanoid.MaxHealth = 100000
+    humanoid.Health = humanoid.MaxHealth
+    print("God Mode ativado!")
+end
+
+local function surrender()
+    local arms = {"RightUpperArm", "LeftUpperArm"}
+    for _, armName in ipairs(arms) do
+        local arm = character:FindFirstChild(armName)
+        if arm then
+            local motor = arm:FindFirstChildOfClass("Motor6D")
+            if motor then
+                motor.C0 = motor.C0 * CFrame.Angles(math.rad(-90), 0, 0)
+            end
+        end
+    end
+    print("Surrender ativado!")
+end
+
+local function resetCharacter()
+    character:BreakJoints()
+    print("Personagem resetado!")
+end
+
+local function goToPlayer(playerName)
+    for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+        if otherPlayer.Name == playerName and otherPlayer.Character then
+            local targetPosition = otherPlayer.Character:FindFirstChild("HumanoidRootPart").Position
+            character:FindFirstChild("HumanoidRootPart").CFrame = CFrame.new(targetPosition)
+            print("Teletransportado para", playerName)
+            return
+        end
+    end
+    print("Jogador não encontrado!")
+end
+
+-- Criar interface gráfica (HUD do Mafrinha)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.CoreGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 150, 0, 450)
+frame.Position = UDim2.new(1, -160, 0, 10)
+frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+
+local function createButton(text, position, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 140, 0, 20)
+    button.Position = position
+    button.Text = text
+    button.TextScaled = true
+    button.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.BorderSizePixel = 0
+    button.Parent = frame
+    button.MouseButton1Click:Connect(callback)
+    return button
+end
+
+createButton("Noclip", UDim2.new(0, 5, 0, 10), toggleNoclip)
+createButton("Aumentar Vida", UDim2.new(0, 5, 0, 40), toggleHealthBoost)
+createButton("Regenerar Vida", UDim2.new(0, 5, 0, 70), regenerateHealth)
+createButton("ESP", UDim2.new(0, 5, 0, 100), toggleESP)
+createButton("ESP c/ Nomes", UDim2.new(0, 5, 0, 130), toggleESPWithNames)
+createButton("Sentar", UDim2.new(0, 5, 0, 160), sitCharacter)
+createButton("Aumentar Tamanho", UDim2.new(0, 5, 0, 190), increaseSize)
+createButton("Fly", UDim2.new(0, 5, 0, 220), fly)
+createButton("God Mode", UDim2.new(0, 5, 0, 250), godMode)
+createButton("Surrender", UDim2.new(0, 5, 0, 280), surrender)
+createButton("Reset", UDim2.new(0, 5, 0, 310), resetCharacter)
+
+local gotoInput = Instance.new("TextBox")
+gotoInput.Size = UDim2.new(0, 140, 0, 20)
+gotoInput.Position = UDim2.new(0, 5, 0, 340)
+gotoInput.PlaceholderText = "Digite o nome do jogador"
+gotoInput.TextColor3 = Color3.new(1, 1, 1)
+gotoInput.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+gotoInput.TextScaled = true
+gotoInput.Parent = frame
+
+local gotoButton = Instance.new("TextButton")
+gotoButton.Size = UDim2.new(0, 140, 0, 20)
+gotoButton.Position = UDim2.new(0, 5, 0, 370)
+gotoButton.Text = "Teletransportar"
+gotoButton.TextScaled = true
+gotoButton.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+gotoButton.TextColor3 = Color3.new(1, 1, 1)
+gotoButton.BorderSizePixel = 0
+gotoButton.Parent = frame
+gotoButton.MouseButton1Click:Connect(function()
+    goToPlayer(gotoInput.Text)
+end)
+
+print("HUD do Mafrinha carregado!")
