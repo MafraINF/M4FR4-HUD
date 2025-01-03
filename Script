@@ -1,13 +1,13 @@
--- M4FR4 HUD - Ferramentas do Mafrinha
--- Variáveis principais
+-- M4FR4 HUD - Mafrinha's Tools
+-- Main variables
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local runService = game:GetService("RunService")
 
--- Funções principais (como antes, sem mudanças)
+-- Main functions (as before, no changes)
 
--- Funções da HUD
+-- HUD functions
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.CoreGui
 
@@ -30,12 +30,12 @@ local function createButton(name, position, action)
     button.Size = UDim2.new(0, 140, 0, 30)
     button.Position = position
     button.Text = name
-    button.BackgroundColor3 = Color3.fromRGB(128, 0, 128) -- Botões roxos
+    button.BackgroundColor3 = Color3.fromRGB(128, 0, 128) -- Purple buttons
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.Parent = frame
     button.MouseButton1Click:Connect(action)
     
-    -- Animação suave
+    -- Smooth animation
     button.MouseEnter:Connect(function()
         button.BackgroundColor3 = Color3.fromRGB(180, 0, 180)
     end)
@@ -43,7 +43,7 @@ local function createButton(name, position, action)
         button.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
     end)
     
-    -- Animação de clique
+    -- Click animation
     button.MouseButton1Down:Connect(function()
         button.Position = button.Position + UDim2.new(0, 0, 0, 2)
     end)
@@ -52,17 +52,17 @@ local function createButton(name, position, action)
     end)
 end
 
--- Seções de ESP
+-- ESP sections
 createButton("ESP", UDim2.new(0, 5, 0, 60), toggleESP)
-createButton("ESP c/ Times", UDim2.new(0, 5, 0, 90), toggleESPWithTeams)
+createButton("ESP with Teams", UDim2.new(0, 5, 0, 90), toggleESPWithTeams)
 createButton("ESP NPC", UDim2.new(0, 5, 0, 120), toggleESPForNPCs)
 
--- Outras funcionalidades
+-- Other functionalities
 createButton("Noclip", UDim2.new(0, 5, 0, 150), toggleNoclip)
-createButton("Aumentar Vida", UDim2.new(0, 5, 0, 180), toggleHealthBoost)
-createButton("Regenerar Vida", UDim2.new(0, 5, 0, 210), regenerateHealth)
-createButton("Sentar", UDim2.new(0, 5, 0, 240), sitCharacter)
-createButton("Aumentar Tamanho", UDim2.new(0, 5, 0, 270), increaseSize)
+createButton("Increase Health", UDim2.new(0, 5, 0, 180), toggleHealthBoost)
+createButton("Regenerate Health", UDim2.new(0, 5, 0, 210), regenerateHealth)
+createButton("Sit", UDim2.new(0, 5, 0, 240), sitCharacter)
+createButton("Increase Size", UDim2.new(0, 5, 0, 270), increaseSize)
 createButton("Fly", UDim2.new(0, 5, 0, 300), fly)
 createButton("God Mode", UDim2.new(0, 5, 0, 330), godMode)
 createButton("Surrender", UDim2.new(0, 5, 0, 360), surrender)
@@ -72,26 +72,26 @@ createButton("Invisible", UDim2.new(0, 5, 0, 450), toggleInvisible)
 createButton("Free Cam", UDim2.new(0, 5, 0, 480), toggleFreeCam)
 createButton("Anti-Gravity", UDim2.new(0, 5, 0, 510), toggleGravity)
 createButton("Speed Boost", UDim2.new(0, 5, 0, 540), toggleSpeedBoost)
-createButton("Mudar Clima", UDim2.new(0, 5, 0, 570), changeWeather)
+createButton("Change Weather", UDim2.new(0, 5, 0, 570), changeWeather)
 
--- Clone Illusion (movimento rápido para criar ilusão de dois bonecos)
+-- Clone Illusion (quick movement to create the illusion of two characters)
 local cloneIllusionActive = true
 local function cloneIllusion()
-    local speed = 1000  -- Mais rápido, para um pequeno movimento horizontal
-    local direction = Vector3.new(1, 0, 0)  -- Movimento horizontal
+    local speed = 1000  -- Faster, for small horizontal movement
+    local direction = Vector3.new(1, 0, 0)  -- Horizontal movement
     local startPosition = character:FindFirstChild("HumanoidRootPart").Position
     local time = 0
 
-    -- Movimento rápido para a ilusão
+    -- Quick movement for the illusion
     while cloneIllusionActive do
         character:SetPrimaryPartCFrame(character.HumanoidRootPart.CFrame + direction * speed * math.sin(time))
         time = time + 0.1
         wait(0.05)
     end
 end
-createButton("Clone Ilusion", UDim2.new(0, 5, 0, 600), cloneIllusion)
+createButton("Clone Illusion", UDim2.new(0, 5, 0, 600), cloneIllusion)
 
--- Animação de Flutuar
+-- Float animation
 local function floatAnimation()
     local bodyPosition = Instance.new("BodyPosition")
     bodyPosition.MaxForce = Vector3.new(100000, 100000, 100000)
@@ -99,10 +99,10 @@ local function floatAnimation()
     bodyPosition.P = 10000
     bodyPosition.Parent = character:FindFirstChild("HumanoidRootPart")
     
-    -- Movendo suavemente para cima e para baixo
+    -- Smoothly move up and down
     while true do
         bodyPosition.Position = bodyPosition.Position + Vector3.new(0, math.sin(tick()) * 0.5, 0)
         wait(0.1)
     end
 end
-createButton("Flutuar", UDim2.new(0, 5, 0, 630), floatAnimation)
+createButton("Float", UDim2.new(0, 5, 0, 630), floatAnimation)
